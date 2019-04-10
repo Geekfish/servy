@@ -6,7 +6,9 @@ defmodule Servy.Handler do
   import Servy.Parser, only: [parse: 1]
   import Servy.FileHandler, only: [file_response: 2]
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
+
   alias Servy.Conv
+  alias Servy.BearController
 
   @pages_path Path.expand("pages", File.cwd!())
 
@@ -47,24 +49,21 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{method: "GET", path: "/bears/" <> bear_id} = conv) do
-    %{conv | status: 200, resp_body: "Bear ##{bear_id}"}
+    params = Map.put(conv.params, "id", bear_id)
+    BearController.show(conv, params)
   end
 
   def route(%Conv{method: "DELETE", path: "/bears/" <> bear_id} = conv) do
-    Logger.error("Someone tried to remove a bear :(")
-    %{conv | status: 403, resp_body: "Bear ##{bear_id} cannot be removed!"}
+    params = Map.put(conv.params, "id", bear_id)
+    BearController.delete(conv, params)
   end
 
   def route(%Conv{method: "GET", path: "/bears"} = conv) do
-    %{conv | status: 200, resp_body: "Teddy, Smokey, Paddington"}
+    BearController.index(conv)
   end
 
   def route(%Conv{method: "POST", path: "/bears"} = conv) do
-    %{
-      conv
-      | status: 201,
-        resp_body: "Created a #{conv.params["type"]} bear named #{conv.params["name"]}!"
-    }
+    BearController.create(conv, conv.params)
   end
 
   def route(%Conv{} = conv) do
