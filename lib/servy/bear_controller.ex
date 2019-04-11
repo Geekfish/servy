@@ -5,17 +5,6 @@ defmodule Servy.BearController do
   alias Servy.Bear
   alias Servy.BearView
 
-  # @templates_path Path.expand("templates", File.cwd!())
-
-  # defp render(conv, template, bindings \\ []) do
-  #   content =
-  #     @templates_path
-  #     |> Path.join(template)
-  #     |> EEx.eval_file(bindings)
-
-  #   %{conv | status: 200, resp_body: content}
-  # end
-
   defp render(conv, content) do
     %{conv | status: 200, resp_body: content}
   end
