@@ -1,5 +1,6 @@
 defmodule Servy.Parser do
   alias Servy.Conv
+  alias Poison
 
   def parse(request) do
     [top, params_string] = String.split(request, "\r\n\r\n")
@@ -32,6 +33,10 @@ defmodule Servy.Parser do
   """
   def parse_params("application/x-www-form-urlencoded", params_string) do
     params_string |> String.trim() |> URI.decode_query()
+  end
+
+  def parse_params("application/json", params_string) do
+    Poison.decode!(params_string)
   end
 
   def parse_params(_, _), do: %{}
