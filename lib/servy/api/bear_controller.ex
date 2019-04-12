@@ -4,6 +4,12 @@ defmodule Servy.Api.BearController do
       Servy.Wildthings.list_bears()
       |> Poison.encode!()
 
-    %{conv | status: 200, resp_body: json, resp_content_type: "application/json"}
+    conv = put_resp_content_type(conv, "application/json")
+    %{conv | status: 200, resp_body: json}
+  end
+
+  defp put_resp_content_type(conv, content_type) do
+    resp_headers = Map.put(conv.resp_headers, "Content-Type", content_type)
+    %{conv | resp_headers: resp_headers}
   end
 end

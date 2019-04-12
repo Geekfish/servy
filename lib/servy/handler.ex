@@ -3,7 +3,7 @@ defmodule Servy.Handler do
 
   import Servy.Parser, only: [parse: 1]
   import Servy.FileHandler, only: [file_response: 2]
-  import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
+  import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1, put_content_length: 1]
 
   alias Servy.Conv
   alias Servy.BearController
@@ -19,6 +19,7 @@ defmodule Servy.Handler do
     |> log
     |> route
     |> track
+    |> put_content_length
     |> format_response
   end
 
@@ -73,11 +74,18 @@ defmodule Servy.Handler do
     %{conv | status: 404, resp_body: "Path #{conv.path} not found"}
   end
 
+  def format_response_headers(conv) do
+    conv.resp_headers
+    |> Enum.map(fn {k, v} -> "#{k}: #{v}\r" end)
+    |> Enum.sort()
+    |> Enum.reverse()
+    |> Enum.join("\n")
+  end
+
   def format_response(%Conv{} = conv) do
     """
     HTTP/1.1 #{Conv.full_status(conv)}\r
-    Content-Type: #{conv.resp_content_type}\r
-    Content-Length: #{byte_size(conv.resp_body)}\r
+    #{format_response_headers(conv)}
     \r
     #{conv.resp_body}
     """
