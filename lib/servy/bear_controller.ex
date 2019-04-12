@@ -1,5 +1,3 @@
-require Logger
-
 defmodule Servy.BearController do
   alias Servy.Wildthings
   alias Servy.Bear
@@ -31,7 +29,6 @@ defmodule Servy.BearController do
   end
 
   def delete(conv, %{"id" => id}) do
-    Logger.error("Someone tried to remove a bear :(")
     %{conv | status: 403, resp_body: "Bear ##{id} cannot be removed!"}
   end
 end
