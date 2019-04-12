@@ -12,4 +12,8 @@ defmodule Servy.FileHandler do
   def file_response({:error, reason}, %Conv{} = conv) do
     %{conv | status: 500, resp_body: "Could not retrieve about page: #{reason}"}
   end
+
+  def markdown_to_html(%Conv{} = conv) do
+    %{conv | resp_body: Earmark.as_html!(conv.resp_body)}
+  end
 end

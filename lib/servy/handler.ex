@@ -2,7 +2,7 @@ defmodule Servy.Handler do
   @moduledoc "Handles HTTP requests."
 
   import Servy.Parser, only: [parse: 1]
-  import Servy.FileHandler, only: [file_response: 2]
+  import Servy.FileHandler, only: [file_response: 2, markdown_to_html: 1]
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1, put_content_length: 1]
 
   alias Servy.Conv
@@ -34,15 +34,23 @@ defmodule Servy.Handler do
     |> file_response(conv)
   end
 
+  def route(%Conv{method: "GET", path: "/pages/faq"} = conv) do
+    @pages_path
+    |> Path.join("faq.md")
+    |> File.read()
+    |> file_response(conv)
+    |> markdown_to_html
+  end
+
   def route(%Conv{method: "GET", path: "/pages/" <> page_name} = conv) do
-    Path.expand("../../pages", __DIR__)
+    @pages_path
     |> Path.join("#{page_name}.html")
     |> File.read()
     |> file_response(conv)
   end
 
   def route(%Conv{method: "GET", path: "/bears/new"} = conv) do
-    Path.expand("../../pages", __DIR__)
+    @pages_path
     |> Path.join("form.html")
     |> File.read()
     |> file_response(conv)
