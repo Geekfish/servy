@@ -1,4 +1,4 @@
-defmodule Servy.HTTPClient do
+defmodule Servy.HttpClient do
   @bear_host 'localhost'
   @bear_port 4000
 
@@ -6,9 +6,8 @@ defmodule Servy.HTTPClient do
     {:ok, sock} = :gen_tcp.connect(@bear_host, @bear_port, [:binary, packet: 0, active: false])
     :ok = :gen_tcp.send(sock, request)
     {:ok, response} = :gen_tcp.recv(sock, 0)
-    IO.puts("⬇ Received response:\n")
-    IO.puts(response)
     :ok = :gen_tcp.close(sock)
+    response
   end
 
   def request_bears() do
@@ -20,6 +19,8 @@ defmodule Servy.HTTPClient do
     \r
     """
 
-    send_request(request)
+    response = send_request(request)
+    IO.puts("⬇ Received response:\n")
+    IO.puts(response)
   end
 end
