@@ -15,6 +15,8 @@ defmodule Recurse do
   end
 
   def triple([]), do: []
-end
 
-Recurse.sum([1, 2, 3, 4, 5])
+  def main() do
+    Recurse.sum([1, 2, 3, 4, 5])
+  end
+end
