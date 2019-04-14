@@ -32,7 +32,7 @@ defmodule Servy.Handler do
       |> Enum.map(&Task.async(VideoCam, :get_snapshot, [&1]))
       |> Enum.map(&Task.await/1)
 
-    where_is_bigfoot = Task.await(task)
+    where_is_bigfoot = Task.await(task, :timer.seconds(2))
 
     %{conv | status: 200, resp_body: inspect({snapshots, where_is_bigfoot})}
   end
