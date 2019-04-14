@@ -1,0 +1,13 @@
+<h1>Sensors</h1>
+
+<ul>
+    <%= for snapshot <- snapshots do %>
+    <li><img src="<%= snapshot %>"/></li>
+    <% end %>
+</ul>
+
+<p>
+    Bigfoot's last known location:
+    <strong>LAT <%= location.lat %> LON <%= location.lon %></strong
+</p>
+

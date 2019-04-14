@@ -9,6 +9,7 @@ defmodule Servy.Handler do
   alias Servy.BearController
   alias Servy.Api.BearController, as: ApiBearController
   alias Servy.VideoCam
+  alias Servy.BearView
 
   @pages_path Path.expand("pages", File.cwd!())
 
@@ -24,6 +25,14 @@ defmodule Servy.Handler do
     |> format_response
   end
 
+  def route(%Conv{method: "POST", path: "/pledges"} = conv) do
+    Servy.PledgeController.create(conv, conv.params)
+  end
+
+  def route(%Conv{method: "GET", path: "/pledges"} = conv) do
+    Servy.PledgeController.index(conv)
+  end
+
   def route(%Conv{method: "GET", path: "/sensors"} = conv) do
     task = Task.async(Servy.Tracker, :get_location, ["bigfoot"])
 
@@ -34,7 +43,7 @@ defmodule Servy.Handler do
 
     where_is_bigfoot = Task.await(task, :timer.seconds(2))
 
-    %{conv | status: 200, resp_body: inspect({snapshots, where_is_bigfoot})}
+    %{conv | status: 200, resp_body: BearView.sensors(snapshots, where_is_bigfoot)}
   end
 
   def route(%Conv{method: "GET", path: "/kaboom"} = _conv) do

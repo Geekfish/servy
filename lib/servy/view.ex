@@ -1,7 +1,7 @@
 defmodule Servy.View do
   @templates_path Path.expand("templates", File.cwd!())
 
-  defp render(conv, template, bindings \\ []) do
+  def render(conv, template, bindings \\ []) do
     content =
       @templates_path
       |> Path.join(template)
