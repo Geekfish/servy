@@ -1,8 +1,10 @@
 defmodule Servy.HttpServer do
   @doc """
   Starts the server on the given `port` of localhost.
+  Optional `ack_pid` argument allows sending an acknowledgement for when
+  the server is up and accepting connections
   """
-  def start(port) when is_integer(port) and port > 1023 do
+  def start(port, ack_pid \\ nil) when is_integer(port) and port > 1023 do
     # Creates a socket to listen for client connections.
     # `listen_socket` is bound to the listening socket.
     {:ok, listen_socket} =
@@ -15,6 +17,10 @@ defmodule Servy.HttpServer do
     # `reuseaddr: true` - allows reusing the address if the listener crashes
 
     IO.puts("\n🎧  Listening for connection requests on port #{port}...\n")
+
+    if ack_pid != nil do
+      send(ack_pid, {self(), :ready})
+    end
 
     accept_loop(listen_socket)
   end
