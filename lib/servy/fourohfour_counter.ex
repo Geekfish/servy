@@ -1,53 +1,39 @@
 defmodule Servy.FourOhFourCounter do
   @name __MODULE__
 
+  alias Servy.GenericServer
+
   # Client
 
   def start() do
-    pid = spawn(__MODULE__, :listen_loop, [])
-    Process.register(pid, @name)
-    pid
+    IO.puts("Starting the 404 server...")
+    GenericServer.start(__MODULE__, [], @name)
   end
 
   def bump_count(endpoint) do
-    send(@name, {:bump_count, endpoint})
+    Servy.GenericServer.cast(@name, {:bump_count, endpoint})
   end
 
   def get_count(endpoint) do
-    send(@name, {self(), :get_count, endpoint})
-
-    receive do
-      {:result, count} -> count
-    end
+    Servy.GenericServer.call(@name, {:get_count, endpoint})
   end
 
   def get_counts() do
-    send(@name, {self(), :get_counts})
-
-    receive do
-      {:result, state} -> state
-    end
+    Servy.GenericServer.call(@name, :get_counts)
   end
 
-  # Server
+  # Server Callbacks
+  def handle_cast({:bump_count, endpoint}, state) do
+    state = Map.update(state, endpoint, 1, &(&1 + 1))
+    {state, state}
+  end
 
-  def listen_loop(state \\ %{}) do
-    receive do
-      {:bump_count, endpoint} ->
-        state = Map.update(state, endpoint, 1, &(&1 + 1))
-        listen_loop(state)
+  def handle_call({:get_count, endpoint}, state) do
+    count = Map.get(state, endpoint, 0)
+    {count, state}
+  end
 
-      {sender, :get_count, endpoint} ->
-        count = Map.get(state, endpoint, 0)
-        send(sender, {:result, count})
-        listen_loop(state)
-
-      {sender, :get_counts} ->
-        send(sender, {:result, state})
-        listen_loop(state)
-
-      _ ->
-        listen_loop(state)
-    end
+  def handle_call(:get_counts, state) do
+    {state, state}
   end
 end
