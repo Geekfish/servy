@@ -3,19 +3,28 @@ defmodule Servy.PledgeServer do
 
   use GenServer
 
+  defmodule State do
+    defstruct cache_size: 3, pledges: []
+  end
+
   def init(init_arg) do
-    {:ok, init_arg}
+    state = %{init_arg | pledges: fetch_recent_pledges_from_service()}
+    {:ok, state}
   end
 
   def start do
     IO.puts("Starting the pledge server...")
-    GenServer.start(__MODULE__, [], name: @name)
+    GenServer.start(__MODULE__, %State{}, name: @name)
   end
 
   # Client
 
   def clear do
     GenServer.cast(@name, :clear)
+  end
+
+  def set_cache_size(size) do
+    GenServer.cast(@name, {:set_cache_size, size})
   end
 
   def create_pledge(name, amount) do
@@ -31,26 +40,40 @@ defmodule Servy.PledgeServer do
   end
 
   # Server Callbacks
-  def handle_cast(:clear, _state), do: {:noreply, []}
+  def handle_cast(:clear, state), do: {:noreply, %{state | pledges: []}}
+
+  def handle_cast({:set_cache_size, size}, state) do
+    {:noreply, %{state | cache_size: size, pledges: Enum.take(state.pledges, size)}}
+  end
 
   def handle_call(:total_pledged, _from, state) do
-    response = Enum.map(state, &elem(&1, 1)) |> Enum.sum()
+    response = Enum.map(state.pledges, &elem(&1, 1)) |> Enum.sum()
     {:reply, response, state}
   end
 
   def handle_call(:recent_pledges, _from, state) do
-    {:reply, state, state}
+    {:reply, state.pledges, state}
   end
 
   def handle_call({:create_pledge, name, amount}, _from, state) do
     {:ok, id} = send_pledge_to_service(name, amount)
-    new_state = [{name, amount} | Enum.take(state, 2)]
-    {:reply, id, new_state}
+    new_state = [{name, amount} | Enum.take(state.pledges, state.cache_size - 1)]
+    {:reply, id, %{state | pledges: new_state}}
+  end
+
+  def handle_info(message, state) do
+    IO.puts("Can't touch this! #{inspect(message)}")
+    {:noreply, state}
   end
 
   defp send_pledge_to_service(_, _) do
     # Does stuff...
     {:ok, "pledge-#{:rand.uniform(1000)}"}
+  end
+
+  defp fetch_recent_pledges_from_service() do
+    # Actual implementation....
+    [{"wilma", 15}, {"fred", 25}]
   end
 end
 
@@ -60,12 +83,16 @@ alias Servy.PledgeServer
 
 send(pid, {:stop, "hammertime"})
 
+PledgeServer.set_cache_size(4)
+
 IO.inspect(PledgeServer.create_pledge("larry", 10))
+IO.inspect(PledgeServer.recent_pledges())
+
+PledgeServer.clear()
+
 IO.inspect(PledgeServer.create_pledge("moe", 20))
 IO.inspect(PledgeServer.create_pledge("curly", 30))
 IO.inspect(PledgeServer.create_pledge("daisy", 40))
-
-PledgeServer.clear()
 
 IO.inspect(PledgeServer.create_pledge("grace", 50))
 
