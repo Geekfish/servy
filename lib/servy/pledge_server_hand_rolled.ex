@@ -29,7 +29,7 @@ defmodule Servy.GenericServer do
         listen_loop(callback_module, new_state)
 
       unexpected ->
-        new_state = callback_module.handle_info(message, state)
+        new_state = callback_module.handle_info(unexpected, state)
         listen_loop(callback_module, new_state)
     end
   end
