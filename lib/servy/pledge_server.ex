@@ -1,5 +1,5 @@
 defmodule Servy.PledgeServer do
-  @name __MODULE__
+  @name :pledge_server
 
   use GenServer
 
@@ -12,9 +12,9 @@ defmodule Servy.PledgeServer do
     {:ok, state}
   end
 
-  def start do
+  def start_link(_arg) do
     IO.puts("Starting the pledge server...")
-    GenServer.start(__MODULE__, %State{}, name: @name)
+    GenServer.start_link(__MODULE__, %State{}, name: @name)
   end
 
   # Client
@@ -77,25 +77,25 @@ defmodule Servy.PledgeServer do
   end
 end
 
-alias Servy.PledgeServer
+# alias Servy.PledgeServer
 
-{:ok, pid} = PledgeServer.start()
+# {:ok, pid} = PledgeServer.start_link()
 
-send(pid, {:stop, "hammertime"})
+# send(pid, {:stop, "hammertime"})
 
-PledgeServer.set_cache_size(4)
+# PledgeServer.set_cache_size(4)
 
-IO.inspect(PledgeServer.create_pledge("larry", 10))
-IO.inspect(PledgeServer.recent_pledges())
+# IO.inspect(PledgeServer.create_pledge("larry", 10))
+# IO.inspect(PledgeServer.recent_pledges())
 
-PledgeServer.clear()
+# PledgeServer.clear()
 
-IO.inspect(PledgeServer.create_pledge("moe", 20))
-IO.inspect(PledgeServer.create_pledge("curly", 30))
-IO.inspect(PledgeServer.create_pledge("daisy", 40))
+# IO.inspect(PledgeServer.create_pledge("moe", 20))
+# IO.inspect(PledgeServer.create_pledge("curly", 30))
+# IO.inspect(PledgeServer.create_pledge("daisy", 40))
 
-IO.inspect(PledgeServer.create_pledge("grace", 50))
+# IO.inspect(PledgeServer.create_pledge("grace", 50))
 
-IO.inspect(PledgeServer.recent_pledges())
+# IO.inspect(PledgeServer.recent_pledges())
 
-# IO.inspect(PledgeServer.total_pledged())
+# # IO.inspect(PledgeServer.total_pledged())
